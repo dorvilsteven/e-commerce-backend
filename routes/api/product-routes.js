@@ -8,11 +8,20 @@ router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
   Product.findAll({ 
-    include: [Category, Tag],
+    include: [
+      {
+        model: Category,
+        attributes: ['id', 'category_name']
+      }, 
+      {
+        model: Tag,
+        attributes: ['id', 'tag_name']
+      }
+    ]
   }).then(products => res.json(products))
   .catch((err) => {
     console.log(err);
-    res.status(400).json(err);
+    res.status(500).json(err);
   });
 });
 
@@ -21,14 +30,23 @@ router.get('/:id', (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
   Product.findAll({
-    include: [Category, Tag],
     where: {
       id: req.params.id
-    }
+    },
+    include: [
+      {
+        model: Category,
+        attributes: ['id', 'category_name']
+      }, 
+      {
+        model: Tag,
+        attributes: ['id', 'tag_name']
+      }
+    ]
   }).then(product => res.json(product))
   .catch((err) => {
     console.log(err);
-    res.status(400).json(err);
+    res.status(500).json(err);
   });
 });
 
@@ -60,7 +78,7 @@ router.post('/', (req, res) => {
     .then((productTagIds) => res.status(200).json(productTagIds))
     .catch((err) => {
       console.log(err);
-      res.status(400).json(err);
+      res.status(500).json(err);
     });
 });
 
@@ -109,10 +127,16 @@ router.delete('/:id', (req, res) => {
     where: {
       id: req.params.id
     }
-  }).then(response => res.json(response))
+  }).then(response => {
+    if(!response){
+      res.status(404).json({ message: 'No item Founnd with this id' });
+      return;
+    }
+    res.json(response);
+  })
   .catch((err) => {
     console.log(err);
-    res.status(400).json(err);
+    res.status(500).json(err);
   });
 });
 
